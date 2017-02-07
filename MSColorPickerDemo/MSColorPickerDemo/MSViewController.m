@@ -73,7 +73,7 @@
 
 #pragma mark - MSColorViewDelegate
 
-- (void)colorViewController:(MSColorSelectionViewController *)colorViewCntroller didChangeColor:(UIColor *)color
+- (void)colorViewController:(MSColorSelectionViewController *)colorViewController didChangeColor:(UIColor *)color
 {
     self.view.backgroundColor = color;
 }

@@ -41,10 +41,10 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  Tells the data source to return the color components.
  *
- *  @param colorViewCntroller The color view.
+ *  @param colorViewController The color view.
  *  @param color The new color value.
  */
-- (void)colorViewController:(MSColorSelectionViewController *)colorViewCntroller didChangeColor:(UIColor *)color;
+- (void)colorViewController:(MSColorSelectionViewController *)colorViewController didChangeColor:(UIColor *)color;
 
 @end
 
