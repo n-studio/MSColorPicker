@@ -43,6 +43,7 @@ static CGFloat const MSColorWheelDimension = 200.0f;
 
     MSColorWheelView *_colorWheel;
     MSColorComponentView *_brightnessView;
+    MSColorComponentView *_alphaView;
     UIView *_colorSample;
 
     HSB _colorComponents;
@@ -124,11 +125,20 @@ static CGFloat const MSColorWheelDimension = 200.0f;
     _brightnessView.format = @"%.2f";
     _brightnessView.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_brightnessView];
+    
+    _alphaView = [[MSColorComponentView alloc] init];
+    _alphaView.title = NSLocalizedString(@"Alpha", );
+    _alphaView.maximumValue = MSHSBColorComponentMaxValue;
+    _alphaView.format = @"%.2f";
+    _alphaView.translatesAutoresizingMaskIntoConstraints = NO;
+    [self addSubview:_alphaView];
 
     [_colorWheel addTarget:self action:@selector(ms_colorDidChangeValue:) forControlEvents:UIControlEventValueChanged];
     [_colorWheel addTarget:self action:@selector(ms_colorDidSelectValue:) forControlEvents:UIControlEventTouchUpInside];
     [_brightnessView addTarget:self action:@selector(ms_brightnessDidChangeValue:) forControlEvents:UIControlEventValueChanged];
     [_brightnessView addTarget:self action:@selector(ms_brightnessDidSelectValue:) forControlEvents:UIControlEventTouchUpInside];
+    [_alphaView addTarget:self action:@selector(ms_alphaDidChangeValue:) forControlEvents:UIControlEventValueChanged];
+    [_alphaView addTarget:self action:@selector(ms_alphaDidSelectValue:) forControlEvents:UIControlEventTouchUpInside];
 
     [self setNeedsUpdateConstraints];
 }
@@ -150,13 +160,15 @@ static CGFloat const MSColorWheelDimension = 200.0f;
                                @"height": @(MSColorSampleViewHeight),
                                @"color_wheel_dimension": @(MSColorWheelDimension) };
 
-    NSDictionary *views = NSDictionaryOfVariableBindings(_colorSample, _colorWheel, _brightnessView);
+    NSDictionary *views = NSDictionaryOfVariableBindings(_colorSample, _colorWheel, _brightnessView, _alphaView);
     NSMutableArray *layoutConstraints = [NSMutableArray array];
 
     [layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-margin-[_colorSample]-margin-|" options:0 metrics:metrics views:views]];
     [layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-margin-[_colorWheel(>=color_wheel_dimension)]-margin-|" options:0 metrics:metrics views:views]];
     [layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-margin-[_brightnessView]-margin-|" options:0 metrics:metrics views:views]];
-    [layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-margin-[_colorSample(height)]-margin-[_colorWheel]-margin-[_brightnessView]-(>=margin@250)-|" options:0 metrics:metrics views:views]];
+    [layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-margin-[_alphaView]-margin-|" options:0 metrics:metrics views:views]];
+    [layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-margin-[_colorSample(height)]-margin-[_colorWheel]-margin-[_brightnessView]-margin-[_alphaView]-(>=margin@250)-|" options:0 metrics:metrics views:views]];
+    
     [layoutConstraints addObject:[NSLayoutConstraint
                                   constraintWithItem:_colorWheel
                                            attribute:NSLayoutAttributeWidth
@@ -174,11 +186,11 @@ static CGFloat const MSColorWheelDimension = 200.0f;
                                @"height": @(MSColorSampleViewHeight),
                                @"color_wheel_dimension": @(MSColorWheelDimension) };
 
-    NSDictionary *views = NSDictionaryOfVariableBindings(_colorSample, _colorWheel, _brightnessView);
+    NSDictionary *views = NSDictionaryOfVariableBindings(_colorSample, _colorWheel, _brightnessView, _alphaView);
     NSMutableArray *layoutConstraints = [NSMutableArray array];
 
     [layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-margin-[_colorSample]-margin-|" options:0 metrics:metrics views:views]];
-    [layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-margin-[_colorWheel(>=color_wheel_dimension)]-margin-[_brightnessView]-(margin@500)-|" options:0 metrics:metrics views:views]];
+    [layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-margin-[_colorWheel(>=color_wheel_dimension)]-margin-[_brightnessView]-margin-[_alphaView]-(margin@500)-|" options:0 metrics:metrics views:views]];
     [layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-margin-[_colorSample(height)]-margin-[_colorWheel]-(margin@500)-|" options:0 metrics:metrics views:views]];
     [layoutConstraints addObject:[NSLayoutConstraint
                                   constraintWithItem:_colorWheel
@@ -196,6 +208,14 @@ static CGFloat const MSColorWheelDimension = 200.0f;
                                            attribute:NSLayoutAttributeCenterY
                                           multiplier:1.0f
                                             constant:0]];
+    [layoutConstraints addObject:[NSLayoutConstraint
+                                  constraintWithItem:_alphaView
+                                  attribute:NSLayoutAttributeCenterY
+                                  relatedBy:NSLayoutRelationEqual
+                                  toItem:self
+                                  attribute:NSLayoutAttributeCenterY
+                                  multiplier:1.0f
+                                  constant:0]];
     return layoutConstraints;
 }
 
@@ -209,6 +229,7 @@ static CGFloat const MSColorWheelDimension = 200.0f;
 - (void)ms_updateSlidersWithColorComponents:(HSB)colorComponents
 {
     [_brightnessView setValue:colorComponents.brightness];
+    [_alphaView setValue:colorComponents.alpha];
     UIColor *tmp = [UIColor colorWithHue:colorComponents.hue saturation:colorComponents.saturation brightness:1.0f alpha:1.0f];
     [_brightnessView setColors:@[(id)[UIColor blackColor].CGColor, (id)tmp.CGColor]];
 }
@@ -235,6 +256,18 @@ static CGFloat const MSColorWheelDimension = 200.0f;
 - (void)ms_brightnessDidSelectValue:(MSColorComponentView *)sender
 {
     _colorComponents.brightness = sender.value;
+    [self.delegate colorView:self didChangeColor:self.color];
+    [self reloadData];
+}
+
+- (void)ms_alphaDidChangeValue:(MSColorComponentView *)sender
+{
+    _colorComponents.alpha = sender.value;
+}
+
+- (void)ms_alphaDidSelectValue:(MSColorComponentView *)sender
+{
+    _colorComponents.alpha = sender.value;
     [self.delegate colorView:self didChangeColor:self.color];
     [self reloadData];
 }
