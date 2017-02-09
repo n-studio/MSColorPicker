@@ -126,7 +126,9 @@ static CGFloat const MSColorWheelDimension = 200.0f;
     [self addSubview:_brightnessView];
 
     [_colorWheel addTarget:self action:@selector(ms_colorDidChangeValue:) forControlEvents:UIControlEventValueChanged];
+    [_colorWheel addTarget:self action:@selector(ms_colorDidSelectValue:) forControlEvents:UIControlEventTouchUpInside];
     [_brightnessView addTarget:self action:@selector(ms_brightnessDidChangeValue:) forControlEvents:UIControlEventValueChanged];
+    [_brightnessView addTarget:self action:@selector(ms_brightnessDidSelectValue:) forControlEvents:UIControlEventTouchUpInside];
 
     [self setNeedsUpdateConstraints];
 }
@@ -215,11 +217,22 @@ static CGFloat const MSColorWheelDimension = 200.0f;
 {
     _colorComponents.hue = sender.hue;
     _colorComponents.saturation = sender.saturation;
+}
+    
+- (void)ms_colorDidSelectValue:(MSColorWheelView *)sender
+{
+    _colorComponents.hue = sender.hue;
+    _colorComponents.saturation = sender.saturation;
     [self.delegate colorView:self didChangeColor:self.color];
     [self reloadData];
 }
 
 - (void)ms_brightnessDidChangeValue:(MSColorComponentView *)sender
+{
+    _colorComponents.brightness = sender.value;
+}
+    
+- (void)ms_brightnessDidSelectValue:(MSColorComponentView *)sender
 {
     _colorComponents.brightness = sender.value;
     [self.delegate colorView:self didChangeColor:self.color];

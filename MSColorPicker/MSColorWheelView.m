@@ -104,6 +104,7 @@
     CGPoint position = [[touches anyObject] locationInView:self];
 
     [self onTouchEventWithPosition:position];
+    [self sendActionsForControlEvents:UIControlEventTouchUpInside];
 }
 
 - (void)onTouchEventWithPosition:(CGPoint)point

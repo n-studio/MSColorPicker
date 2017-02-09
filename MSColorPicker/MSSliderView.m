@@ -115,7 +115,10 @@ static const CGFloat MSThumbViewEdgeInset = -10.0f;
 
 - (void)ms_didPanThumbView:(UIPanGestureRecognizer *)gestureRecognizer
 {
-    if (gestureRecognizer.state != UIGestureRecognizerStateBegan && gestureRecognizer.state != UIGestureRecognizerStateChanged) {
+    if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
+        [self sendActionsForControlEvents: UIControlEventTouchUpInside];
+    }
+    else if (gestureRecognizer.state != UIGestureRecognizerStateBegan && gestureRecognizer.state != UIGestureRecognizerStateChanged) {
         return;
     }
 
